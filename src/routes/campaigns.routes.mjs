@@ -39,6 +39,14 @@ const requireAdmin = (req, res, next) => {
 // Create a new campaign
 router.post('/', authenticate, async (req, res) => {
   try {
+    // Check if user is restricted
+    if (req.user.status === 'restricted') {
+      return res.status(403).json({ 
+        message: 'Your account is restricted. You cannot create campaigns at this time. Please contact the administrator for assistance.',
+        code: 'USER_RESTRICTED'
+      });
+    }
+    
     const { title, description, goal, category, imageKey } = req.body;
     const campaign = new Campaign({
       title,

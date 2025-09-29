@@ -228,4 +228,37 @@ export class ApiService {
       throw error;
     }
   }
+
+  // Get all users (Admin only)
+  static async getAllUsers() {
+    try {
+      const response = await api.get('/users');
+      return response.data;
+    } catch (error) {
+      console.error('Get all users error:', error);
+      throw error;
+    }
+  }
+
+  // Update user status (Admin only)
+  static async updateUserStatus(userId, status) {
+    try {
+      const response = await api.put(`/users/${userId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      console.error('Update user status error:', error);
+      throw error;
+    }
+  }
+
+  // Update user role (Admin only)
+  static async updateUserRole(userId, role) {
+    try {
+      const response = await api.put(`/users/${userId}/role`, { role });
+      return response.data;
+    } catch (error) {
+      console.error('Update user role error:', error);
+      throw error;
+    }
+  }
 }

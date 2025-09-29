@@ -11,7 +11,8 @@ import {
   Platform,
   StatusBar,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  Modal
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
@@ -30,6 +31,7 @@ const CampaignCreationScreen = ({ navigation }) => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [focusedInput, setFocusedInput] = useState('');
+  const [showRestrictionModal, setShowRestrictionModal] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -97,8 +99,16 @@ const CampaignCreationScreen = ({ navigation }) => {
       }, 2000);
     } catch (error) {
       console.error('Campaign submission error:', error);
-      setMessage('There was an error creating your campaign. Please try again.');
-      setMessageType('error');
+      
+      // Check if user is restricted
+      if (error.response && error.response.data && error.response.data.code === 'USER_RESTRICTED') {
+        setMessage(''); // Clear the loading message
+        setMessageType('');
+        setShowRestrictionModal(true);
+      } else {
+        setMessage('There was an error creating your campaign. Please try again.');
+        setMessageType('error');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -448,6 +458,48 @@ const CampaignCreationScreen = ({ navigation }) => {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      
+      {/* Restriction Modal */}
+      <Modal
+        visible={showRestrictionModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowRestrictionModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <LinearGradient
+              colors={['rgba(239, 68, 68, 0.1)', 'rgba(220, 38, 38, 0.05)']}
+              style={styles.modalContent}
+            >
+              <View style={styles.modalHeader}>
+                <MaterialIcons name="block" size={48} color="#ef4444" />
+                <Text style={styles.modalTitle}>Account Restricted</Text>
+              </View>
+              
+              <Text style={styles.modalMessage}>
+                Your account is currently restricted and you cannot create campaigns at this time.
+              </Text>
+              
+              <Text style={styles.modalSubMessage}>
+                Please contact the administrator for assistance or more information about your account status.
+              </Text>
+              
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setShowRestrictionModal(false)}
+              >
+                <LinearGradient
+                  colors={['#ef4444', '#dc2626']}
+                  style={styles.modalButtonGradient}
+                >
+                  <Text style={styles.modalButtonText}>Understood</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -756,6 +808,64 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748b',
     lineHeight: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    width: '85%',
+    maxWidth: 400,
+  },
+  modalContent: {
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ef4444',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#374151',
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 24,
+  },
+  modalSubMessage: {
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  modalButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  modalButtonGradient: {
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 export default CampaignCreationScreen;

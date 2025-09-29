@@ -125,13 +125,8 @@ const SignInScreen = ({ navigation }) => {
       // Wait for AsyncStorage writes to complete before navigating
       setTimeout(() => {
         if (userProfile && userProfile.role === 'admin') {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'MainApp' }]
-          });
-          setTimeout(() => {
-            navigation.navigate('AdminPortal');
-          }, 300);
+          // Navigate directly to AdminPortal for admin users
+          navigation.navigate('AdminPortal');
         } else {
           const validRoles = ['donor', 'campaign_creator'];
           if (userProfile && validRoles.includes(userProfile.role)) {

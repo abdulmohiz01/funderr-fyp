@@ -98,4 +98,93 @@ router.put('/:id', authenticate, async (req, res) => {
   }
 });
 
+// Get all users (Admin only)
+router.get('/', authenticate, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin access required.' });
+    }
+    
+    // Get all users excluding passwords
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user status (Admin only)
+router.put('/:id/status', authenticate, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin access required.' });
+    }
+    
+    const { status } = req.body;
+    
+    // Validate status
+    if (!['active', 'restricted'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Must be active or restricted.' });
+    }
+    
+    // Update user status
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { status, updatedAt: new Date() },
+      { new: true }
+    ).select('-password');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error('Update user status error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update user role (Admin only)
+router.put('/:id/role', authenticate, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin access required.' });
+    }
+    
+    const { role } = req.body;
+    
+    // Validate role
+    if (!['donor', 'campaign_creator', 'user', 'admin'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role.' });
+    }
+    
+    // Prevent admin from demoting themselves
+    if (req.params.id === req.user._id.toString() && role !== 'admin') {
+      return res.status(400).json({ message: 'Cannot change your own admin role.' });
+    }
+    
+    // Update user role
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { role, updatedAt: new Date() },
+      { new: true }
+    ).select('-password');
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;

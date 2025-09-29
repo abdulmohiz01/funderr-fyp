@@ -46,6 +46,7 @@ const AuthNavigator = () => {
       <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} options={{ headerShown: true }} />
       <Stack.Screen name="DonorProfileCreation" component={DonorProfileCreationScreen} options={{ headerShown: true }} />
       <Stack.Screen name="CampaignProfileCreation" component={CampaignProfileCreationScreen} options={{ headerShown: true }} />
+      <Stack.Screen name="AdminPortal" component={AdminPortalScreen} options={{ headerShown: true, title: 'Admin Portal' }} />
     </Stack.Navigator>
   );
 };

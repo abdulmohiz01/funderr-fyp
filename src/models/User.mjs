@@ -22,8 +22,13 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['donor', 'campaign_creator', 'user'],
+    enum: ['donor', 'campaign_creator', 'user', 'admin'],
     default: 'user',
+  },
+  status: {
+    type: String,
+    enum: ['active', 'restricted'],
+    default: 'active',
   },
   // Donor profile fields
   phone: {
