@@ -78,7 +78,7 @@ const AppNavigator = () => {
   if (isLoading) {
     return <LoadingScreen message="Loading your dreams..." />;
   }
-
+ 
   // Configure linking for web and deep links
   const linking = {
     prefixes: [Linking.createURL('/'), 'https://funderrapp.com'],
